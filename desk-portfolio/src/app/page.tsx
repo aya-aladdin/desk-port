@@ -8,12 +8,22 @@ import * as THREE from "three";
 function RoomModel() {
   const { scene } = useGLTF("/room.glb");
   return (
-    <primitive
-      object={scene}
-      rotation={[Math.PI / 2, 0, 0]}
-      position={[0, 0, 0]}
-    />
+    <primitive object={scene} rotation={[0, 0, 0]} position={[0, -1.5, 0]} />
   );
+}
+
+function CameraRig() {
+  useFrame(({ pointer, camera }) => {
+    const targetX = pointer.x * 1.5;
+    const targetY = pointer.y * 0.8;
+
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetX, 0.05);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 0.05);
+
+    camera.lookAt(targetX, targetY, 0);
+  });
+
+  return null;
 }
 
 function Flashlight() {
@@ -21,13 +31,14 @@ function Flashlight() {
   const targetRef = useRef<THREE.Object3D>(null!);
   const { viewport } = useThree();
 
-  useFrame(({ pointer }) => {
-    const x = (pointer.x * viewport.width) / 2;
-    const y = (pointer.y * viewport.height) / 2;
+  useFrame(({ pointer, camera }) => {
+    const x = camera.position.x + (pointer.x * viewport.width) / 2;
+    const y = camera.position.y + (pointer.y * viewport.height) / 2;
 
-    targetRef.current.position.set(x, y, 1.0);
+    targetRef.current.position.set(x, y, 0);
 
     if (lightRef.current) {
+      lightRef.current.position.set(camera.position.x, camera.position.y, 5);
       lightRef.current.target = targetRef.current;
     }
   });
@@ -35,11 +46,9 @@ function Flashlight() {
   return (
     <>
       <object3D ref={targetRef} />
-
       <spotLight
         ref={lightRef}
-        position={[0, -2, 3]}
-        intensity={100}
+        intensity={120}
         angle={Math.PI / 5}
         penumbra={0.4}
         color="#ffe8a3"
@@ -55,20 +64,18 @@ export default function Home() {
       <Canvas
         shadows
         camera={{
-          position: [0, -3.8, 2.8],
+          position: [0, 0, 5],
           fov: 50,
         }}
       >
-        <ambientLight intensity={0.15} color="#2a4b7c" />
-
+        <CameraRig />
+        <ambientLight intensity={0.25} color="#3b5998" />
         <directionalLight
-          position={[-0.4, 3.0, 3.2]}
-          intensity={0.4}
-          color="#3a5a8c"
+          position={[-2, 4, 5]}
+          intensity={0.5}
+          color="#5c7aaa"
         />
-
         <Flashlight />
-
         <React.Suspense fallback={null}>
           <RoomModel />
         </React.Suspense>
