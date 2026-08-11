@@ -8,19 +8,18 @@ import * as THREE from "three";
 function RoomModel() {
   const { scene } = useGLTF("/room.glb");
   return (
-    <primitive object={scene} rotation={[0, 0, 0]} position={[0, -1.5, 0]} />
+    <primitive object={scene} rotation={[0, 0, 0]} position={[0, -2, 0]} />
   );
 }
 
 function CameraRig() {
   useFrame(({ pointer, camera }) => {
-    const targetX = pointer.x * 1.5;
-    const targetY = pointer.y * 0.8;
+    camera.position.set(0, 1.6, 10.5);
+    const maxPitch = Math.PI / 4;
+    const maxYaw = Math.PI / 3;
 
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetX, 0.05);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 0.05);
-
-    camera.lookAt(targetX, targetY, 0);
+    camera.rotation.y = -pointer.x * maxYaw;
+    camera.rotation.x = pointer.y * maxPitch;
   });
 
   return null;
@@ -38,7 +37,7 @@ function Flashlight() {
     targetRef.current.position.set(x, y, 0);
 
     if (lightRef.current) {
-      lightRef.current.position.set(camera.position.x, camera.position.y, 5);
+      lightRef.current.position.copy(camera.position);
       lightRef.current.target = targetRef.current;
     }
   });
@@ -48,8 +47,8 @@ function Flashlight() {
       <object3D ref={targetRef} />
       <spotLight
         ref={lightRef}
-        intensity={120}
-        angle={Math.PI / 5}
+        intensity={180}
+        angle={Math.PI / 4.5}
         penumbra={0.4}
         color="#ffe8a3"
         castShadow
@@ -64,14 +63,14 @@ export default function Home() {
       <Canvas
         shadows
         camera={{
-          position: [0, 0, 5],
+          position: [0, 1.6, 10.5],
           fov: 50,
         }}
       >
         <CameraRig />
         <ambientLight intensity={0.25} color="#3b5998" />
         <directionalLight
-          position={[-2, 4, 5]}
+          position={[-2, 6, 5]}
           intensity={0.5}
           color="#5c7aaa"
         />
