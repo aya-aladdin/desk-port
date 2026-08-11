@@ -12,16 +12,16 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.AmbientLight(0x2b3958, 0.15);
+const ambientLight = new THREE.AmbientLight(0x2b3958, 0.12);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0x5c7aaa, 0.3);
+const directionalLight = new THREE.DirectionalLight(0x5c7aaa, 0.25);
 directionalLight.position.set(-2, 6, 5);
 scene.add(directionalLight);
 
-const flashlight = new THREE.SpotLight(0xffe8a3, 300);
-flashlight.angle = Math.PI / 14;
-flashlight.penumbra = 0.15;
+const flashlight = new THREE.SpotLight(0xffe8a3, 350);
+flashlight.angle = Math.PI / 8;
+flashlight.penumbra = 1.0;
 flashlight.castShadow = true;
 scene.add(flashlight);
 
@@ -39,7 +39,7 @@ window.addEventListener('mousemove', (event) => {
 
 const loader = new GLTFLoader();
 loader.load(
-    '/room.glb',
+    '/room1glb',
     (gltf) => {
         const room = gltf.scene;
         room.position.set(0, -2, 0);

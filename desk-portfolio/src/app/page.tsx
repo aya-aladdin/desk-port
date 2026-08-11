@@ -6,7 +6,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 function RoomModel() {
-  const { scene } = useGLTF("/room.glb");
+  const { scene } = useGLTF("/room1.glb");
   return (
     <primitive object={scene} rotation={[0, 0, 0]} position={[0, -2, 0]} />
   );
@@ -56,9 +56,9 @@ function Flashlight() {
       <object3D ref={targetRef} />
       <spotLight
         ref={lightRef}
-        intensity={300}
-        angle={Math.PI / 14}
-        penumbra={0.15}
+        intensity={350}
+        angle={Math.PI / 8}
+        penumbra={1.0}
         color="#ffe8a3"
         castShadow
       />
@@ -78,10 +78,10 @@ export default function Home() {
       >
         <fog attach="fog" args={["#000000", 4, 12]} />
         <CameraRig />
-        <ambientLight intensity={0.15} color="#2b3958" />
+        <ambientLight intensity={0.12} color="#2b3958" />
         <directionalLight
           position={[-2, 6, 5]}
-          intensity={0.3}
+          intensity={0.25}
           color="#5c7aaa"
         />
         <Flashlight />
@@ -94,9 +94,9 @@ export default function Home() {
         className="pointer-events-none absolute top-0 left-0 right-0 h-48 z-10"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
           maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
           WebkitMaskImage:
             "linear-gradient(to bottom, black 0%, transparent 100%)",
@@ -107,13 +107,13 @@ export default function Home() {
         className="pointer-events-none absolute inset-0 z-10"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 20%, rgba(0, 0, 0, 0.8) 65%, rgba(0, 0, 0, 0.98) 100%)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
+            "radial-gradient(ellipse at center, transparent 15%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 1) 90%)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           maskImage:
-            "radial-gradient(ellipse at center, transparent 25%, black 80%)",
+            "radial-gradient(ellipse at center, transparent 15%, black 65%)",
           WebkitMaskImage:
-            "radial-gradient(ellipse at center, transparent 25%, black 80%)",
+            "radial-gradient(ellipse at center, transparent 15%, black 65%)",
         }}
       />
 
@@ -124,4 +124,4 @@ export default function Home() {
   );
 }
 
-useGLTF.preload("/room.glb");
+useGLTF.preload("/room1.glb");
