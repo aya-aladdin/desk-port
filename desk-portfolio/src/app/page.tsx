@@ -14,12 +14,15 @@ function RoomModel() {
 
 function CameraRig() {
   useFrame(({ pointer, camera }) => {
-    camera.position.set(0, 1.6, 10.5);
-    const maxPitch = Math.PI / 4;
-    const maxYaw = Math.PI / 3;
+    camera.position.set(0, 2.2, 6);
 
+    const basePitch = -0.35;
+
+    const maxPitch = Math.PI / 6;
+    const maxYaw = Math.PI / 4;
+
+    camera.rotation.x = basePitch + pointer.y * maxPitch;
     camera.rotation.y = -pointer.x * maxYaw;
-    camera.rotation.x = pointer.y * maxPitch;
   });
 
   return null;
@@ -32,7 +35,7 @@ function Flashlight() {
 
   useFrame(({ pointer, camera }) => {
     const x = camera.position.x + (pointer.x * viewport.width) / 2;
-    const y = camera.position.y + (pointer.y * viewport.height) / 2;
+    const y = camera.position.y + (pointer.y * viewport.height) / 2 - 1.5;
 
     targetRef.current.position.set(x, y, 0);
 
@@ -63,7 +66,7 @@ export default function Home() {
       <Canvas
         shadows
         camera={{
-          position: [0, 1.6, 10.5],
+          position: [0, 2.2, 3.5],
           fov: 50,
         }}
       >
