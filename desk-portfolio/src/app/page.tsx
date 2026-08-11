@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -17,7 +17,6 @@ function CameraRig() {
     camera.position.set(0, 2.2, 6);
 
     const basePitch = -0.35;
-
     const maxPitch = Math.PI / 6;
     const maxYaw = Math.PI / 4;
 
@@ -31,18 +30,25 @@ function CameraRig() {
 function Flashlight() {
   const lightRef = useRef<THREE.SpotLight>(null!);
   const targetRef = useRef<THREE.Object3D>(null!);
-  const { viewport } = useThree();
+  const raycaster = useRef(new THREE.Raycaster());
 
-  useFrame(({ pointer, camera }) => {
-    const x = camera.position.x + (pointer.x * viewport.width) / 2;
-    const y = camera.position.y + (pointer.y * viewport.height) / 2 - 1.5;
+  useFrame(({ pointer, camera, scene }) => {
+    if (!lightRef.current || !targetRef.current) return;
 
-    targetRef.current.position.set(x, y, 0);
+    lightRef.current.position.copy(camera.position);
 
-    if (lightRef.current) {
-      lightRef.current.position.copy(camera.position);
-      lightRef.current.target = targetRef.current;
+    raycaster.current.setFromCamera(pointer, camera);
+    const intersects = raycaster.current.intersectObjects(scene.children, true);
+
+    if (intersects.length > 0) {
+      targetRef.current.position.copy(intersects[0].point);
+    } else {
+      const fallbackPos = new THREE.Vector3();
+      raycaster.current.ray.at(5, fallbackPos);
+      targetRef.current.position.copy(fallbackPos);
     }
+
+    lightRef.current.target = targetRef.current;
   });
 
   return (
@@ -50,9 +56,9 @@ function Flashlight() {
       <object3D ref={targetRef} />
       <spotLight
         ref={lightRef}
-        intensity={180}
-        angle={Math.PI / 4.5}
-        penumbra={0.4}
+        intensity={300}
+        angle={Math.PI / 14}
+        penumbra={0.15}
         color="#ffe8a3"
         castShadow
       />
@@ -70,11 +76,12 @@ export default function Home() {
           fov: 50,
         }}
       >
+        <fog attach="fog" args={["#000000", 4, 12]} />
         <CameraRig />
-        <ambientLight intensity={0.25} color="#3b5998" />
+        <ambientLight intensity={0.15} color="#2b3958" />
         <directionalLight
           position={[-2, 6, 5]}
-          intensity={0.5}
+          intensity={0.3}
           color="#5c7aaa"
         />
         <Flashlight />
@@ -83,7 +90,34 @@ export default function Home() {
         </React.Suspense>
       </Canvas>
 
-      <div className="absolute bottom-6 left-6 text-white/50 text-xs tracking-widest pointer-events-none uppercase">
+      <div
+        className="pointer-events-none absolute top-0 left-0 right-0 h-48 z-10"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, black 0%, transparent 100%)",
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 20%, rgba(0, 0, 0, 0.8) 65%, rgba(0, 0, 0, 0.98) 100%)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+          maskImage:
+            "radial-gradient(ellipse at center, transparent 25%, black 80%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at center, transparent 25%, black 80%)",
+        }}
+      />
+
+      <div className="absolute bottom-6 left-6 text-white/50 text-xs tracking-widest pointer-events-none uppercase z-20">
         Move mouse to inspect desk
       </div>
     </main>
