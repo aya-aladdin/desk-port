@@ -29,6 +29,7 @@ const lightTarget = new THREE.Object3D();
 scene.add(lightTarget);
 flashlight.target = lightTarget;
 
+let headphonesModel = null;
 let tableTorch = null;
 let torchGlow = null;
 let hasTorch = false;
@@ -52,6 +53,17 @@ loader.load('/room.glb', (gltf) => {
     room.position.set(0, -2, 0);
     scene.add(room);
 });
+
+loader.load(
+    '/headphones.glb',
+    (gltf) => {
+        headphonesModel = gltf.scene;
+        headphonesModel.scale.set('0.15, 0.15, 0.15');
+        headphonesModel.position.set(-0.6, -0.65, 2);
+        headphonesModel.rotation.set(0, Math.PI / 4, 0);
+        scene.add(headphonesModel);
+    }
+)
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();

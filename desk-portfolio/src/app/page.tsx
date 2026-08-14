@@ -124,6 +124,20 @@ function Flashlight({ active }: { active: boolean }) {
   );
 }
 
+function Headphones() {
+  const { scene } = useGLTF("/headphones.glb");
+  return (
+    <primitive
+      object={scene.clone()}
+      position={[-0.1, -0.65, 3.4]}
+      rotation={[0, -Math.PI / 4, 0]}
+      scale={0.3}
+      onPointerOver={() => (document.body.style.cursor = "pointer")}
+      onPointerOut={() => (document.body.style.cursor = "crosshair")}
+    />
+  );
+}
+
 export default function Home() {
   const [hasTorch, setHasTorch] = useState(false);
   const [isLaptopZoomed, setIsLaptopZoomed] = useState(false);
@@ -153,6 +167,7 @@ export default function Home() {
             isZoomed={isLaptopZoomed}
             onZoomIn={() => !isLaptopZoomed && setIsLaptopZoomed(true)}
           />
+          <Headphones />
           <RoomModel />
         </React.Suspense>
 
@@ -185,8 +200,8 @@ export default function Home() {
       <div className="absolute bottom-6 left-6 text-white/50 text-xs tracking-widest pointer-events-none uppercase z-20">
         {!isLaptopZoomed
           ? !hasTorch
-            ? "Click the torch on the desk or inspect the MacBook"
-            : "Move mouse to inspect desk or click MacBook"
+            ? "Click the torch on the desk or inspect the items"
+            : "Move mouse to inspect desk or click items"
           : "Viewing Laptop Display"}
       </div>
 
@@ -214,4 +229,5 @@ export default function Home() {
 
 useGLTF.preload("/room.glb");
 useGLTF.preload("/FlashLight.glb");
+useGLTF.preload("/headphones.glb");
 useGLTF.preload("/models/MacBook.glb");
