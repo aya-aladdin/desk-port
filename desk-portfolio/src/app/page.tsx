@@ -4,6 +4,8 @@ import React, { useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import MacBookModel from "@/components/MacBookModel";
+import InteractiveLaptopUI from "@/components/LaptopUI/InteractiveLaptopUI";
 
 function RoomModel() {
   const { scene } = useGLTF("/room.glb");
@@ -32,7 +34,7 @@ function TableTorch({
 
   return (
     <group
-      position={[0, -0.65, 2]}
+      position={[-0.4, -0.65, 2]}
       rotation={[0, Math.PI / 4, 0]}
       onClick={(e) => {
         e.stopPropagation();
@@ -53,16 +55,25 @@ function TableTorch({
   );
 }
 
-function CameraRig() {
+function CameraRig({ isLaptopZoomed }: { isLaptopZoomed: boolean }) {
   useFrame(({ pointer, camera }) => {
-    camera.position.set(0, 2.2, 6);
+    if (isLaptopZoomed) {
+      const targetPos = new THREE.Vector3(0, -0.2, 3.4);
+      camera.position.lerp(targetPos, 0.08);
 
-    const basePitch = -0.35;
-    const maxPitch = Math.PI / 6;
-    const maxYaw = Math.PI / 4;
+      const targetLookAt = new THREE.Vector3(0, -0.2, 1.8);
+      camera.lookAt(targetLookAt);
+    } else {
+      const targetPos = new THREE.Vector3(0, 2.2, 6);
+      camera.position.lerp(targetPos, 0.08);
 
-    camera.rotation.x = basePitch + pointer.y * maxPitch;
-    camera.rotation.y = -pointer.x * maxYaw;
+      const basePitch = -0.35;
+      const maxPitch = Math.PI / 6;
+      const maxYaw = Math.PI / 4;
+
+      camera.rotation.x = basePitch + pointer.y * maxPitch;
+      camera.rotation.y = -pointer.x * maxYaw;
+    }
   });
 
   return null;
@@ -115,6 +126,7 @@ function Flashlight({ active }: { active: boolean }) {
 
 export default function Home() {
   const [hasTorch, setHasTorch] = useState(false);
+  const [isLaptopZoomed, setIsLaptopZoomed] = useState(false);
 
   return (
     <main className="w-screen h-screen bg-black overflow-hidden relative cursor-crosshair">
@@ -126,51 +138,56 @@ export default function Home() {
         }}
       >
         <fog attach="fog" args={["#0a0d14", 6, 18]} />
-        <CameraRig />
+        <CameraRig isLaptopZoomed={isLaptopZoomed} />
         <ambientLight intensity={0.35} color="#4a5878" />
         <directionalLight
           position={[-2, 6, 5]}
           intensity={0.55}
           color="#7a97c2"
         />
+
         <TableTorch isPickedUp={hasTorch} onPickup={() => setHasTorch(true)} />
-        <Flashlight active={hasTorch} />
+
         <React.Suspense fallback={null}>
+          <MacBookModel
+            isZoomed={isLaptopZoomed}
+            onZoomIn={() => !isLaptopZoomed && setIsLaptopZoomed(true)}
+          />
           <RoomModel />
         </React.Suspense>
+
+        <Flashlight active={hasTorch} />
       </Canvas>
+
+      {isLaptopZoomed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <button
+            onClick={() => setIsLaptopZoomed(false)}
+            className="absolute top-6 right-6 z-50 px-4 py-2 bg-neutral-900/90 hover:bg-neutral-800 text-white border border-neutral-700/80 rounded-lg text-xs font-mono tracking-wider transition uppercase shadow-xl cursor-pointer"
+          >
+            ESC / Close Screen
+          </button>
+
+          <div className="w-full max-w-5xl h-[80vh] shadow-2xl rounded-xl overflow-hidden border border-neutral-700/50">
+            <InteractiveLaptopUI />
+          </div>
+        </div>
+      )}
 
       <div
         className="pointer-events-none absolute top-0 left-0 right-0 h-48 z-10"
         style={{
           background:
             "linear-gradient(to bottom, rgba(10, 13, 20, 0.85) 0%, rgba(10, 13, 20, 0.4) 50%, transparent 100%)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-          maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, black 0%, transparent 100%)",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 30%, rgba(10, 13, 20, 0.6) 70%, rgba(10, 13, 20, 0.9) 100%)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-          maskImage:
-            "radial-gradient(ellipse at center, transparent 30%, black 80%)",
-          WebkitMaskImage:
-            "radial-gradient(ellipse at center, transparent 30%, black 80%)",
         }}
       />
 
       <div className="absolute bottom-6 left-6 text-white/50 text-xs tracking-widest pointer-events-none uppercase z-20">
-        {!hasTorch
-          ? "Click the torch on the desk to pick it up"
-          : "Move mouse to inspect desk"}
+        {!isLaptopZoomed
+          ? !hasTorch
+            ? "Click the torch on the desk or inspect the MacBook"
+            : "Move mouse to inspect desk or click MacBook"
+          : "Viewing Laptop Display"}
       </div>
 
       <div className="absolute bottom-6 right-6 z-20 flex items-center gap-3">
@@ -197,3 +214,4 @@ export default function Home() {
 
 useGLTF.preload("/room.glb");
 useGLTF.preload("/FlashLight.glb");
+useGLTF.preload("/models/MacBook.glb");
